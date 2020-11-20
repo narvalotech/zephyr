@@ -59,7 +59,7 @@ static int apa102_update_rgb(const struct device *dev, struct led_rgb *pixels,
 	uint8_t *p = (uint8_t *)pixels;
 	size_t i;
 	/* SOF (3 bits) followed by the 0 to 31 global dimming level */
-	uint8_t prefix = 0xE0 | 31;
+	uint8_t prefix = 0xE0 | 1;
 
 	/* Rewrite to the on-wire format */
 	for (i = 0; i < count; i++) {
