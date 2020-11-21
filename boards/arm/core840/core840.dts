@@ -72,7 +72,7 @@
 		sw1 = &button1;
 		sw2 = &button2;
 		sw3 = &button3;
-		spi2 = &spi2;
+		ledspi = &spi2;
 	};
 };
 
