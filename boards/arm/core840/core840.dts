@@ -72,6 +72,7 @@
 		sw1 = &button1;
 		sw2 = &button2;
 		sw3 = &button3;
+		spi2 = &spi2;
 	};
 };
 
@@ -107,7 +108,7 @@
 };
 
 &spi2 {
-	compatible = "nordic,nrf-spi";
+	compatible = "nordic,nrf-spim";
 	status = "okay";
 	sck-pin = <24>;
 	mosi-pin = <20>;
