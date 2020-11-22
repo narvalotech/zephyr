@@ -62,6 +62,66 @@
 		};
 	};
 
+	ext_io {
+		/* GPIOs present on extension connector */
+		eio0: ext_io0 {
+			gpios = <&gpio1 0 GPIO_ACTIVE_HIGH>;
+			label = "External IO 0";
+			/* also controls external 5V rail */
+		};
+		eio1: ext_io1 {
+			gpios = <&gpio1 2 GPIO_ACTIVE_HIGH>;
+			label = "External IO 1";
+		};
+		eio2_ain0: ext_ain0_io2 {
+			gpios = <&gpio0 31 GPIO_ACTIVE_HIGH>;
+			label = "External IO 2, analog in 0";
+		};
+		eio3_ain1: ext_ain1_io3 {
+			gpios = <&gpio0 29 GPIO_ACTIVE_HIGH>;
+			label = "External IO 3, analog in 1";
+		};
+		eio4_ain2: ext_ain2_io4 {
+			gpios = <&gpio0 2 GPIO_ACTIVE_HIGH>;
+			label = "External IO 4, analog in 2";
+		};
+	};
+
+	board_inputs {
+		chg_active: chg_active {
+			gpios = <&gpio0 17 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
+			label = "Battery charging indicator (output from charger)";
+		};
+		batmon_out: batmon_out {
+			gpios = <&gpio0 31 GPIO_ACTIVE_HIGH>;
+			label = "Battery volt. divider output";
+			/* Shared with ext_ain0_io2 */
+		};
+		acc_int1: acc_int1 {
+			gpios = <&gpio0 6 GPIO_ACTIVE_HIGH>;
+			label = "Accelerometer IRQ 1";
+		};
+		acc_int2: acc_int2 {
+			gpios = <&gpio0 8 GPIO_ACTIVE_HIGH>;
+			label = "Accelerometer IRQ 2";
+		};
+	};
+
+	board_outputs {
+		batmon_en: batmon_en {
+			gpios = <&gpio0 4 GPIO_ACTIVE_HIGH>;
+			label = "Battery volt. divider enable";
+		};
+		sens_en: sens_en {
+			gpios = <&gpio1 9 GPIO_ACTIVE_HIGH>;
+			label = "Sensor VDD bus enable";
+		};
+		hapt_pwm: hapt_pwm {
+			gpios = <&gpio1 15 GPIO_ACTIVE_HIGH>;
+			label = "Haptics (vibration) driver PWM";
+		};
+	};
+
 	/* These aliases are provided for compatibility with samples */
 	aliases {
 		led0 = &led0;
