@@ -66,6 +66,7 @@
 	};
 
 	ext_io {
+		compatible = "gpio-leds";
 		/* GPIOs present on extension connector */
 		eio0: ext_io0 {
 			gpios = <&gpio1 0 GPIO_ACTIVE_HIGH>;
@@ -91,6 +92,7 @@
 	};
 
 	board_inputs {
+		compatible = "gpio-keys";
 		chg_active: chg_active {
 			gpios = <&gpio0 17 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
 			label = "Battery charging indicator (output from charger)";
@@ -111,6 +113,7 @@
 	};
 
 	board_outputs {
+		compatible = "gpio-leds";
 		batmon_en: batmon_en {
 			gpios = <&gpio0 4 GPIO_ACTIVE_HIGH>;
 			label = "Battery volt. divider enable";
