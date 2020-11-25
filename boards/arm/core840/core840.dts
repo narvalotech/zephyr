@@ -171,6 +171,16 @@
 	status = "okay";
 	sda-pin = <13>;
 	scl-pin = <15>;
+
+	accel: lis2dh@33 {
+		/* Is actually a lis3dh, but compatible with lis3dh cmd set */
+		compatible = "st,lis2dh";
+		label = "LIS3DH";
+		/* SA0 = 1 */
+		reg = <0x33>;
+		irq-gpios = 	<&gpio0 6 GPIO_ACTIVE_HIGH>,
+				<&gpio0 8 GPIO_ACTIVE_HIGH>;
+	};
 };
 
 &spi2 {
