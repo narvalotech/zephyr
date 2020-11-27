@@ -167,17 +167,19 @@
 };
 
 &i2c1 {
-	compatible = "nordic,nrf-twi";
+	compatible = "nordic,nrf-twim";
 	status = "okay";
 	sda-pin = <13>;
 	scl-pin = <15>;
+	clock-frequency = <I2C_BITRATE_FAST>;
 
-	accel: lis2dh@33 {
+	accel: lis2dh@19 {
 		/* Is actually a lis3dh, but compatible with lis3dh cmd set */
 		compatible = "st,lis2dh";
-		label = "LIS3DH";
+		label = "LIS3DH-ACCEL";
+		status = "okay";
 		/* SA0 = 1 */
-		reg = <0x33>;
+		reg = <0x19>;
 		irq-gpios = 	<&gpio0 6 GPIO_ACTIVE_HIGH>,
 				<&gpio0 8 GPIO_ACTIVE_HIGH>;
 	};
