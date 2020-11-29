@@ -47,21 +47,24 @@
 	buttons {
 		compatible = "gpio-keys";
 		button0: button_0 {
-			gpios = <&gpio1 13 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
+			/* Lower left */
+			gpios = <&gpio1 10 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
 			label = "Push button switch 0";
 		};
 		button1: button_1 {
-			gpios = <&gpio1 10 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
+			/* Lower right */
+			gpios = <&gpio1 13 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
 			label = "Push button switch 1";
 		};
 		button2: button_2 {
+			/* Upper right */
 			gpios = <&gpio1 4 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
 			label = "Push button switch 2";
 		};
 		button3: button_3 {
+			/* Not actually connected to anything */
 			gpios = <&gpio1 1 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
 			label = "Push button switch 3";
-			/* Not actually connected to anything */
 		};
 	};
 
