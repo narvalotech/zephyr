@@ -173,7 +173,7 @@
 	compatible = "nordic,nrf-uart";
 	status = "okay";
 	current-speed = <115200>;
-	tx-pin = <31>;
+	tx-pin = <30>;
 	rx-pin = <29>;
 };
 
