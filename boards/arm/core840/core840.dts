@@ -120,8 +120,16 @@
 			gpios = <&gpio1 9 GPIO_ACTIVE_HIGH>;
 			label = "Sensor VDD bus enable";
 		};
-		hapt_pwm: hapt_pwm {
+		hapt_gpio: hapt_gpio {
 			gpios = <&gpio1 15 GPIO_ACTIVE_HIGH>;
+			label = "Haptics (vibration) driver PWM";
+		};
+	};
+
+	board_pwm {
+		compatible = "pwm-leds";
+		hapt_pwm: hapt_pwm {
+			pwms = <&pwm0 47>;
 			label = "Haptics (vibration) driver PWM";
 		};
 	};
@@ -146,6 +154,13 @@
 		sw3 = &button3;
 		ledspi = &spi0;
 	};
+};
+
+&pwm0 {
+	status = "okay";
+	/* See hapt_pwm node */
+	ch0-pin = <47>;
+	/* ch0-inverted; */
 };
 
 &adc {
