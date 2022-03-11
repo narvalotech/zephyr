@@ -898,6 +898,16 @@ int bmi160_init(const struct device *dev)
 		return -EIO;
 	}
 
+	for(int i=0;i<3;i++)
+	{
+	/* do a dummy read from 0x7F to activate SPI */
+	if (bmi160_byte_read(dev, BMI160_SPI_START, &val) < 0) {
+		LOG_DBG("Cannot read from 0x7F..");
+		return -EIO;
+	}
+	k_busy_wait(50);
+	}
+
 	k_busy_wait(100);
 
 	if (bmi160_byte_read(dev, BMI160_REG_CHIPID, &val) < 0) {
@@ -905,10 +915,12 @@ int bmi160_init(const struct device *dev)
 		return -EIO;
 	}
 
-	if (val != BMI160_CHIP_ID) {
+	if (val != 0xd8) {
 		LOG_DBG("Unsupported chip detected (0x%x)!", val);
 		return -ENODEV;
 	}
+	LOG_DBG("Init ok");
+	/* TODO: better logging */
 
 	/* set default PMU for gyro, accelerometer */
 	data->pmu_sts.gyr = BMI160_DEFAULT_PMU_GYR;
