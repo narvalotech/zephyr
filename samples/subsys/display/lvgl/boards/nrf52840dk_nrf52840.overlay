@@ -1,0 +1,24 @@
+&spi1 {
+	compatible = "nordic,nrf-spim";
+	status = "okay";
+	sck-pin = <3>;
+
+	miso-pin = <45>;
+	miso-pull-up;
+
+	mosi-pin = <28>;
+
+	cs-gpios = <&gpio0 29 GPIO_ACTIVE_HIGH>; /* Display */
+
+	ls0xx@0 {
+		compatible = "sharp,ls0xx";
+		label = "LS0XX";
+		spi-max-frequency = <1000000>;
+		reg = <0>;
+		width = <128>;
+		height = <128>;
+		extcomin-gpios = <&gpio0 30 GPIO_ACTIVE_HIGH>;
+		extcomin-frequency = <60>;
+		disp-en-gpios = <&gpio0 31 GPIO_ACTIVE_HIGH>;
+	};
+};

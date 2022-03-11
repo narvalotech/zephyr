@@ -1,51 +1,45 @@
-/*
- * Copyright (c) 2016 Intel Corporation
- *
- * SPDX-License-Identifier: Apache-2.0
- */
-
 #include <zephyr.h>
 #include <device.h>
 #include <devicetree.h>
 #include <drivers/gpio.h>
+#include <string.h>
+#include <drivers/display.h>
 
 /* 1000 msec = 1 sec */
 #define SLEEP_TIME_MS   1000
 
-/* The devicetree node identifier for the "led0" alias. */
-#define LED0_NODE DT_ALIAS(led0)
+struct display_buffer_descriptor disp_desc = {
+	/** Data buffer size in bytes */
+	.buf_size = 128 * 16,
+	/** Data buffer row width in pixels */
+	.width = 128,
+	/** Data buffer column height in pixels */
+	.height = 128,
+	/** Number of pixels between consecutive rows in the data buffer */
+	.pitch = 128,
+};
 
-#if DT_NODE_HAS_STATUS(LED0_NODE, okay)
-#define LED0	DT_GPIO_LABEL(LED0_NODE, gpios)
-#define PIN	DT_GPIO_PIN(LED0_NODE, gpios)
-#define FLAGS	DT_GPIO_FLAGS(LED0_NODE, gpios)
-#else
-/* A build error here means your board isn't set up to blink an LED. */
-#error "Unsupported board: led0 devicetree alias is not defined"
-#define LED0	""
-#define PIN	0
-#define FLAGS	0
-#endif
+uint8_t buf[128*16] = {0};
 
 void main(void)
 {
-	const struct device *dev;
-	bool led_is_on = true;
-	int ret;
+	const struct device *display_dev;
+	display_dev = device_get_binding("LS0XX");
 
-	dev = device_get_binding(LED0);
-	if (dev == NULL) {
-		return;
-	}
+	uint8_t data = 0xa0;
 
-	ret = gpio_pin_configure(dev, PIN, GPIO_OUTPUT_ACTIVE | FLAGS);
-	if (ret < 0) {
-		return;
-	}
+	display_blanking_off(display_dev);
 
-	while (1) {
-		gpio_pin_set(dev, PIN, (int)led_is_on);
-		led_is_on = !led_is_on;
-		k_msleep(SLEEP_TIME_MS);
+	while(1) {
+		if(data)
+			data = 0;
+		else
+			data = 0xa0;
+
+		memset(buf, data, sizeof(buf));
+
+		printk("Write\n");
+		display_write(display_dev, 0, 0, &disp_desc, buf);
+		k_msleep(500);
 	}
 }
