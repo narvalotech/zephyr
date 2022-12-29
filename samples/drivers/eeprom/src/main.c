@@ -9,6 +9,9 @@
 #include <zephyr/drivers/eeprom.h>
 #include <zephyr/device.h>
 
+#include <zephyr/logging/log.h>
+LOG_MODULE_REGISTER(main, 4);
+
 #define EEPROM_SAMPLE_OFFSET 0
 #define EEPROM_SAMPLE_MAGIC  0xEE9703
 
@@ -35,11 +38,12 @@ static const struct device *get_eeprom_device(void)
 	return dev;
 }
 
+static uint8_t rxbuf[4096];
+
 void main(void)
 {
 	const struct device *eeprom = get_eeprom_device();
 	size_t eeprom_size;
-	struct perisistant_values values;
 	int rc;
 
 	if (eeprom == NULL) {
@@ -49,25 +53,28 @@ void main(void)
 	eeprom_size = eeprom_get_size(eeprom);
 	printk("Using eeprom with size of: %zu.\n", eeprom_size);
 
-	rc = eeprom_read(eeprom, EEPROM_SAMPLE_OFFSET, &values, sizeof(values));
+	for (int a=0; a<512; a++) {
+		rc = eeprom_read(eeprom, a, &rxbuf, 1);
+		if (rc < 0) {
+			printk("Error: Couldn't read eeprom: err: %d.\n", rc);
+			return;
+		} else {
+			LOG_DBG("read[%u]\t %x", a, rxbuf[0]);
+		}
+	}
+
+	/* Sequential readout */
+	uint16_t len = 4096;
+
+	/* Driver prevents us to read across boundary (and test the overflow on the
+	 * other side), too bad.
+	 */
+	rc = eeprom_read(eeprom, 0, rxbuf, len);
 	if (rc < 0) {
 		printk("Error: Couldn't read eeprom: err: %d.\n", rc);
 		return;
+	} else {
+		LOG_HEXDUMP_DBG(rxbuf, 2048, "I2C RX:");
+		LOG_HEXDUMP_DBG(&rxbuf[2048], 2048, "I2C RX:");
 	}
-
-	if (values.magic != EEPROM_SAMPLE_MAGIC) {
-		values.magic = EEPROM_SAMPLE_MAGIC;
-		values.boot_count = 0;
-	}
-
-	values.boot_count++;
-	printk("Device booted %d times.\n", values.boot_count);
-
-	rc = eeprom_write(eeprom, EEPROM_SAMPLE_OFFSET, &values, sizeof(values));
-	if (rc < 0) {
-		printk("Error: Couldn't write eeprom: err:%d.\n", rc);
-		return;
-	}
-
-	printk("Reset the MCU to see the increasing boot counter.\n\n");
 }

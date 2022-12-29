@@ -1,0 +1,19 @@
+/ {
+	aliases {
+		eeprom-0 = &eeprom0_x_nucleo_eeprma2;
+	};
+};
+
+&arduino_i2c {
+	status = "okay";
+	/* clock-frequency = <I2C_BITRATE_FAST>; */
+
+	eeprom0_x_nucleo_eeprma2: eeprom@54 {
+		compatible = "st,m24xxx", "atmel,at24";
+		reg = <0x50>;
+		size = <4096>;
+		pagesize = <32>;
+		address-width = <16>;
+		timeout = <5>;
+	};
+};
