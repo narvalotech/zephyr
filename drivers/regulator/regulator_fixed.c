@@ -31,6 +31,8 @@ static int regulator_fixed_enable(const struct device *dev)
 	const struct regulator_fixed_config *cfg = dev->config;
 	int ret;
 
+	LOG_ERR("set reg to ON");
+
 	ret = gpio_pin_set_dt(&cfg->enable, 1);
 	if (ret < 0) {
 		return ret;
@@ -46,6 +48,8 @@ static int regulator_fixed_enable(const struct device *dev)
 static int regulator_fixed_disable(const struct device *dev)
 {
 	const struct regulator_fixed_config *cfg = dev->config;
+
+	LOG_ERR("set reg to OFF");
 
 	return gpio_pin_set_dt(&cfg->enable, 0);
 }
@@ -80,6 +84,8 @@ static int regulator_fixed_init(const struct device *dev)
 	if (regulator_is_enabled(dev)) {
 		k_busy_wait(cfg->startup_delay_us);
 	}
+
+	LOG_ERR("regulator enabled");
 
 	return 0;
 }

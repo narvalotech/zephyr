@@ -6,6 +6,9 @@
 
 #include <zephyr/kernel.h>
 #include <zephyr/audio/dmic.h>
+#include <zephyr/drivers/regulator.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(dmic_sample);
@@ -28,6 +31,38 @@ LOG_MODULE_REGISTER(dmic_sample);
 #define BLOCK_COUNT      4
 K_MEM_SLAB_DEFINE_STATIC(mem_slab, MAX_BLOCK_SIZE, BLOCK_COUNT, 4);
 
+static uint32_t average;
+static void calc_average(uint16_t *buf, uint16_t len)
+{
+	uint32_t avg = 0;
+
+	int j = 0;
+	for (int i = 0; i+j<len; i++) {
+		for (j=0; j<10; j++) {
+			avg += buf[i+j];
+		}
+		avg /= 11;
+	}
+
+	average = avg / (len / 10);
+}
+
+/* static float level; */
+static void moving_avg(int16_t *ibuf, size_t size, size_t window, int* output)
+{
+	int sum = 0;
+
+	if (ibuf && output) {
+		for (size_t i=0; i<size; i++) {
+			sum += abs(ibuf[i]);
+			if (i>= window) {
+				sum -= abs(ibuf[i - window]);
+			}
+			*output = sum / window;
+		}
+	}
+}
+
 static int do_pdm_transfer(const struct device *dmic_dev,
 			   struct dmic_cfg *cfg,
 			   size_t block_count)
@@ -43,6 +78,14 @@ static int do_pdm_transfer(const struct device *dmic_dev,
 		return ret;
 	}
 
+	/* ret = dmic_trigger(dmic_dev, DMIC_TRIGGER_START); */
+	/* if (ret < 0) { */
+	/* 	LOG_ERR("START trigger failed: %d", ret); */
+	/* 	return ret; */
+	/* } */
+
+	int level = 0;
+	while (1) {
 	ret = dmic_trigger(dmic_dev, DMIC_TRIGGER_START);
 	if (ret < 0) {
 		LOG_ERR("START trigger failed: %d", ret);
@@ -60,7 +103,12 @@ static int do_pdm_transfer(const struct device *dmic_dev,
 			return ret;
 		}
 
-		LOG_INF("%d - got buffer %p of %u bytes", i, buffer, size);
+		/* LOG_INF("%d - got buffer %p of %u bytes", i, buffer, size); */
+		/* LOG_HEXDUMP_INF(buffer, size, "buffer"); */
+
+		/* calc_average(buffer, size); */
+		/* calc_average(buffer, size); */
+		moving_avg((int16_t*)buffer, size, 10, &level);
 
 		k_mem_slab_free(&mem_slab, &buffer);
 	}
@@ -70,16 +118,26 @@ static int do_pdm_transfer(const struct device *dmic_dev,
 		LOG_ERR("STOP trigger failed: %d", ret);
 		return ret;
 	}
+		/* LOG_INF("avg: %u", average); */
+		LOG_INF("avg: %i", level);
+	}
 
 	return ret;
 }
 
 void main(void)
 {
+	const struct device *const reg_dev = DEVICE_DT_GET(DT_NODELABEL(mic_pwr));
 	const struct device *const dmic_dev = DEVICE_DT_GET(DT_NODELABEL(dmic_dev));
 	int ret;
 
 	LOG_INF("DMIC sample");
+
+	for (int i=0; i<4; i++)
+	if (regulator_disable(reg_dev)) {
+		LOG_ERR("%s API failed", reg_dev->name);
+		return;
+	}
 
 	if (!device_is_ready(dmic_dev)) {
 		LOG_ERR("%s is not ready", dmic_dev->name);
@@ -107,18 +165,6 @@ void main(void)
 		},
 	};
 
-	cfg.channel.req_num_chan = 1;
-	cfg.channel.req_chan_map_lo =
-		dmic_build_channel_map(0, 0, PDM_CHAN_LEFT);
-	cfg.streams[0].pcm_rate = MAX_SAMPLE_RATE;
-	cfg.streams[0].block_size =
-		BLOCK_SIZE(cfg.streams[0].pcm_rate, cfg.channel.req_num_chan);
-
-	ret = do_pdm_transfer(dmic_dev, &cfg, 2 * BLOCK_COUNT);
-	if (ret < 0) {
-		return;
-	}
-
 	cfg.channel.req_num_chan = 2;
 	cfg.channel.req_chan_map_lo =
 		dmic_build_channel_map(0, 0, PDM_CHAN_LEFT) |
@@ -127,9 +173,13 @@ void main(void)
 	cfg.streams[0].block_size =
 		BLOCK_SIZE(cfg.streams[0].pcm_rate, cfg.channel.req_num_chan);
 
-	ret = do_pdm_transfer(dmic_dev, &cfg, 2 * BLOCK_COUNT);
-	if (ret < 0) {
-		return;
+	while (1) {
+		ret = do_pdm_transfer(dmic_dev, &cfg, 2 * BLOCK_COUNT);
+		if (ret < 0) {
+			return;
+		}
+		LOG_INF("avg: %u", average);
+		k_msleep(100);
 	}
 
 	LOG_INF("Exiting");

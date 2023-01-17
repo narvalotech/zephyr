@@ -109,23 +109,29 @@ int regulator_disable(const struct device *dev)
 
 	/* disable not supported (always on) */
 	if (api->disable == NULL) {
+		printk("off not supported\n");
 		return 0;
 	}
 
 	/* regulator must stay always on */
 	if  ((config->flags & REGULATOR_ALWAYS_ON) != 0U) {
+		printk("off not authorized\n");
 		return 0;
 	}
 
 	(void)k_mutex_lock(&data->lock, K_FOREVER);
 
+	if (data->refcnt > 0)
 	data->refcnt--;
 
 	if (data->refcnt == 0) {
+		printk("disabling reg\n");
 		ret = api->disable(dev);
 		if (ret < 0) {
 			data->refcnt++;
 		}
+	} else {
+		printk("only decrementing ref\n");
 	}
 
 	k_mutex_unlock(&data->lock);
