@@ -21,6 +21,9 @@
 #include <bluetooth/scan.h>
 #include <bluetooth/gatt_dm.h>
 
+#include <zephyr/usb/usb_device.h>
+#include <zephyr/usb/usbd.h>
+
 #include <zephyr/shell/shell_uart.h>
 
 #include <dk_buttons_and_leds.h>
@@ -633,8 +636,21 @@ BT_CONN_CB_DEFINE(conn_callbacks) = {
 int main(void)
 {
 	int err;
+	const struct device *dev;
 
 	printk("Starting Bluetooth Throughput example\n");
+
+	dev = DEVICE_DT_GET_ONE(zephyr_cdc_acm_uart);
+	if (!device_is_ready(dev)) {
+		printk("CDC ACM device not ready");
+		return 0;
+	}
+
+	int ret = usb_enable(NULL);
+	if (ret != 0) {
+		printk("Failed to enable USB");
+		return 0;
+	}
 
 	err = bt_enable(NULL);
 	if (err) {
