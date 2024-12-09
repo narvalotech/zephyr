@@ -4,6 +4,8 @@
         "dockerfile": "./Dockerfile"
     },
 
+    "privileged": true,
+
     "containerEnv": {
         "HISTCONTROL": "ignoredups:erasedups",
         "ZEPHYR_BASE": "/workspaces/zephyr",
@@ -17,13 +19,12 @@
         "vscode": {
             "extensions": [
                 "ms-vscode.cpptools",
-                "xaver.clang-format",
-                "EditorConfig.EditorConfig",
+                "EditorConfig.EditorConfig"
             ],
             "settings": {
                 "files.watcherExclude": {
                     "${localWorkspaceFolder}/bsim_out/*/**": true
-                },
+                }
             }
         }
     },
@@ -33,6 +34,7 @@
     "updateContentCommand": "/workspaces/zephyr/.devcontainer/scripts/setup-env.sh && /workspaces/zephyr/.devcontainer/scripts/setup-bsim.sh",
 
     "mounts": [
-        "source=${localWorkspaceFolder}/.cache/.bash_history,target=/home/user/.bash_history,type=bind,consistency=cached"
+        "source=${localWorkspaceFolder}/.cache/.bash_history,target=/home/user/.bash_history,type=bind,consistency=cached",
+        "type=bind,source=/dev/bus/usb,target=/dev/bus/usb"
     ]
 }

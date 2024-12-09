@@ -128,16 +128,6 @@ manifest:
       path: modules/hal/nordic
       groups:
         - hal
-    - name: mbedtls
-      revision: 4952e1328529ee549d412b498ea71c54f30aa3b1
-      path: modules/crypto/mbedtls
-      groups:
-        - crypto
-    - name: mcuboot
-      revision: 5d6471bac184c8accaeeb0efcfad8dd35225a28d
-      path: bootloader/mcuboot
-      groups:
-        - bootloader
     - name: nrf_hw_models
       revision: fbc6e614686b69dfa56f9694350b9488cf83d3f7
       path: modules/bsim_hw_models/nrf_hw_models
@@ -154,9 +144,6 @@ manifest:
       path: modules/crypto/tinycrypt
       groups:
         - crypto
-    - name: zcbor
-      revision: 9b07780aca6fb21f82a241ba386ad9b379809337
-      path: modules/lib/zcbor
   # zephyr-keep-sorted-stop
 
   self:
