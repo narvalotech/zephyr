@@ -1,0 +1,37 @@
+# Use Ubuntu as base image
+FROM ubuntu:22.04
+
+# Avoid interactive prompts during installation
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install required dependencies
+RUN apt-get update && apt-get install -y \
+    wget \
+    udev \
+    libudev1 \
+    libusb-1.0-0 \
+    build-essential
+
+# Create directory for tools
+WORKDIR /opt/tools
+
+# Download and install nRF Command Line Tools
+RUN wget https://www.nordicsemi.com/-/media/Software-and-other-downloads/Desktop-software/nRF-command-line-tools/sw/Versions-10-x-x/10-24-2/nrf-command-line-tools_10.24.2_amd64.deb
+
+RUN echo '#!/bin/bash\necho not running udevadm "$@"' > /usr/bin/udevadm && chmod +x /usr/bin/udevadm
+
+RUN dpkg -i nrf-command-line-tools_10.24.2_amd64.deb \
+    && apt install -y /opt/nrf-command-line-tools/share/JLink_Linux_V794e_x86_64.deb --fix-broken \
+    && rm nrf-command-line-tools_10.24.2_amd64.deb
+
+# Copy JLink udev rules
+RUN echo 'ATTRS{idVendor}=="1366", ATTRS{idProduct}=="0101", MODE="0666"\n\
+ATTRS{idVendor}=="1366", ATTRS{idProduct}=="0102", MODE="0666"\n\
+ATTRS{idVendor}=="1366", ATTRS{idProduct}=="0103", MODE="0666"\n\
+ATTRS{idVendor}=="1366", ATTRS{idProduct}=="0104", MODE="0666"' > /etc/udev/rules.d/99-jlink.rules
+
+# Set up environment
+ENV PATH="/opt/tools/JLink_Linux_V*:/opt/nrf-command-line-tools/bin:${PATH}"
+
+# Set entrypoint to bash
+ENTRYPOINT ["/bin/bash"]
